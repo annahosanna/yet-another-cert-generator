@@ -2,6 +2,7 @@ package example;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.math.BigInteger;
@@ -26,6 +27,8 @@ import oracle.security.crypto.asn1.ASN1Object;
 import oracle.security.crypto.asn1.ASN1String;
 import oracle.security.crypto.asn1.ASN1Utils;
 import oracle.security.crypto.cert.*;
+import oracle.security.crypto.cert.X509;
+import org.bouncycastle.asn1.pkcs.ContentInfo;
 //import oracle.
 // import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -71,9 +74,10 @@ public class SelfSignedCertGenerator {
 
   public static void main(String[] args) {
     try {
-    	SelfSignedCertGenerator selfSignedCertGenerator = new SelfSignedCertGenerator();
-    	selfSignedCertGenerator.getPrivateKey();
-    	selfSignedCertGenerator.getCertificate();
+      SelfSignedCertGenerator selfSignedCertGenerator =
+        new SelfSignedCertGenerator();
+      selfSignedCertGenerator.getPrivateKey();
+      selfSignedCertGenerator.getCertificate();
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -176,69 +180,34 @@ public class SelfSignedCertGenerator {
     }
   }
 
-  /*
-  // https://developer.dbp.thalescloud.io/docs/tsh-token-push-and-control/e1c34e566ad71-encrypted-card-data-in-pkcs-7-format
-  private static byte[] encryptPKCS7(byte[] plainData, PublicKey pubKey)
-    throws Exception {
-    CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
-
-    JcaAlgorithmParametersConverter paramsConverter =
-      new JcaAlgorithmParametersConverter();
-    OAEPParameterSpec oaepParamSpec = new OAEPParameterSpec(
-      "SHA-256",
-      "MGF1",
-      MGF1ParameterSpec.SHA256,
-      PSource.PSpecified.DEFAULT
-    );
-    AlgorithmIdentifier algoId = paramsConverter.getAlgorithmIdentifier(
-      PKCSObjectIdentifiers.id_RSAES_OAEP,
-      oaepParamSpec
-    );
-
-    JceKeyTransRecipientInfoGenerator recipInfo =
-      new JceKeyTransRecipientInfoGenerator(
-        KEY_IDENTIFIER.getBytes(),
-        algoId,
-        pubKey
-      ).setProvider(bcProvider);
-
-    gen.addRecipientInfoGenerator(recipInfo);
-
-    CMSProcessableByteArray data = new CMSProcessableByteArray(plainData);
-    BcCMSContentEncryptorBuilder builder = new BcCMSContentEncryptorBuilder(
-      CMSAlgorithm.AES256_CBC
-    );
-
-    CMSEnvelopedData enveloped = gen.generate(data, builder.build());
-
-    return enveloped.getEncoded();
-  }
-*/
-  // Der format needs to be pem
-  // Or PKCS 7 for certificate chain (pfx includes public and private in single file)
-
-
+  // looks like it writes the same cert 3 times
   public void getCertificate() {
     try {
-      
-      byte[] certAsDER = certificate.getEncoded();
-      oracle.security.crypto.cert.X509 x509OracleObject =
-        new oracle.security.crypto.cert.X509(certAsDER);
-      oracle.security.crypto.cert.PKCS7 pkcs7OracleObject =
-        new oracle.security.crypto.cert.PKCS7(x509OracleObject);
-      // ASN1 DER
-      byte[] pkcs7DER = pkcs7OracleObject.getEncoded();
       StringWriter pemStringWriter = new StringWriter();
-      // pemWriter.writeObject(cert);
-      // pemWriter.close();
-      // JcaPEMWriter pemWriter = new JcaPEMWriter(pemStringWriter)
-      FileOutputStream pemPKCS7FileOutputStream = new FileOutputStream(
-        "certificate-chain.pem"
+      JcaPEMWriter pemWriter = new JcaPEMWriter(pemStringWriter);
+      try {
+        pemWriter.writeObject(certificate);
+      } finally {
+        pemWriter.close();
+      }
+
+      try (JcaPEMWriter jcaPEMWriter = new JcaPEMWriter(pemStringWriter)) {
+        jcaPEMWriter.writeObject(certificate);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      // finally {
+      //      pemWriter.close();
+      //   }
+      String certString = pemStringWriter.toString();
+      // Convert this to a try with resources
+      FileOutputStream pemFileOutputStream = new FileOutputStream(
+        "cert.pem"
       );
-      pemPKCS7FileOutputStream.write(pkcs7DER);
-      pemPKCS7FileOutputStream.flush();
-      pemPKCS7FileOutputStream.close();
-      
+      pemFileOutputStream.write(certString.getBytes());
+      pemFileOutputStream.flush();
+      pemFileOutputStream.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
