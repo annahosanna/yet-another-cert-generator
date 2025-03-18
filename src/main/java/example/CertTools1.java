@@ -127,7 +127,7 @@ import org.ejbca.cvc.exception.ParseException;
  *
  * @version $Id$
  */
-public class CertTools {
+public class CertTools1 {
 
   private static final Logger log = Logger.getLogger(CertTools.class);
 

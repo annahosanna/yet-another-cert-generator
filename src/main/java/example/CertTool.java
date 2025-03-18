@@ -787,9 +787,7 @@ public class CertTool {
       wrapper.println("(" + (j + 1) + ") End");
       act = input("Please enter the number of the option", Check.ACTION, null);
       j = Integer.parseInt(act) - 1;
-      if (
-        j >= Action.values().length
-      ) return true; // special 'End' action
+      if (j >= Action.values().length) return true; // special 'End' action
       action = Action.values()[j];
     }
 

@@ -202,9 +202,7 @@ public class SelfSignedCertGenerator {
       //   }
       String certString = pemStringWriter.toString();
       // Convert this to a try with resources
-      FileOutputStream pemFileOutputStream = new FileOutputStream(
-        "cert.pem"
-      );
+      FileOutputStream pemFileOutputStream = new FileOutputStream("cert.pem");
       pemFileOutputStream.write(certString.getBytes());
       pemFileOutputStream.flush();
       pemFileOutputStream.close();
