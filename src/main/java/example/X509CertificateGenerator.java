@@ -1,4 +1,4 @@
-package com.mdm.cert;
+package example;
 
 // https://raw.githubusercontent.com/pglendenning/mdm/refs/heads/master/src/main/java/com/mdm/cert/X509CertificateGenerator.java
 
