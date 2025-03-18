@@ -33,3 +33,6 @@ replay_pid*
 /.gradle/
 /build/
 /.settings/
+
+key.pem
+certs.pem
