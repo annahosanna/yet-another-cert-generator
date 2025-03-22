@@ -81,7 +81,7 @@ import org.wso2.carbon.certificate.mgt.core.util.CommonUtil;
 import org.wso2.carbon.certificate.mgt.core.util.Serializer;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-public class CertificateGenerator {
+public class WSO2CertificateGenerator {
 
   private static final Log log = LogFactory.getLog(CertificateGenerator.class);
 

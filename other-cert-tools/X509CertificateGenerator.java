@@ -59,7 +59,7 @@ import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
  * @author paul
  *
  */
-@SuppressWarnings("deprecation")
+// @SuppressWarnings("deprecation")
 public class X509CertificateGenerator {
 
   private static final String BC = BouncyCastleProvider.PROVIDER_NAME;

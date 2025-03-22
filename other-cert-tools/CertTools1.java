@@ -123,13 +123,13 @@ import org.ejbca.cvc.exception.ParseException;
 /**
  * Tools to handle common certificate operations.
  *
- * Based on EJBCA version: CertTools.java 11281 2011-01-28 16:45:42Z anatom
+ * Based on EJBCA version: CertTools1.java 11281 2011-01-28 16:45:42Z anatom
  *
  * @version $Id$
  */
 public class CertTools1 {
 
-  private static final Logger log = Logger.getLogger(CertTools.class);
+  private static final Logger log = Logger.getLogger(CertTools1.class);
 
   // Initialize dnComponents
   static {
@@ -432,7 +432,7 @@ public class CertTools1 {
         log.error("Error parsing certificate: ", e);
       }
       log.debug("Searching for EMail Address in Subject DN");
-      ArrayList<String> emails = CertTools.getEmailFromDN(
+      ArrayList<String> emails = CertTools1.getEmailFromDN(
         x509cert.getSubjectDN().getName()
       );
       if (!emails.isEmpty()) {
@@ -683,7 +683,7 @@ public class CertTools1 {
     if (cert instanceof X509Certificate) {
       // cert.getType=X.509
       try {
-        CertificateFactory cf = CertTools.getCertificateFactory();
+        CertificateFactory cf = CertTools1.getCertificateFactory();
         X509Certificate x509cert = (X509Certificate) cf.generateCertificate(
           new ByteArrayInputStream(cert.getEncoded())
         );
@@ -925,7 +925,7 @@ public class CertTools1 {
   public static String getIssuerDN(X509CRL crl) {
     String dn = null;
     try {
-      CertificateFactory cf = CertTools.getCertificateFactory();
+      CertificateFactory cf = CertTools1.getCertificateFactory();
       X509CRL x509crl = (X509CRL) cf.generateCRL(
         new ByteArrayInputStream(crl.getEncoded())
       );
@@ -1058,7 +1058,7 @@ public class CertTools1 {
         String temp;
         while (
           (temp = bufRdr.readLine()) != null &&
-          !(temp.equals(CertTools.BEGIN_CERTIFICATE) ||
+          !(temp.equals(CertTools1.BEGIN_CERTIFICATE) ||
             temp.equals(beginKeyTrust))
         ) {
           continue;
@@ -1070,7 +1070,7 @@ public class CertTools1 {
               "Error in " +
               certstream.toString() +
               ", missing " +
-              CertTools.BEGIN_CERTIFICATE +
+              CertTools1.BEGIN_CERTIFICATE +
               " boundary"
             );
           } else {
@@ -1081,7 +1081,7 @@ public class CertTools1 {
         }
         while (
           (temp = bufRdr.readLine()) != null &&
-          !(temp.equals(CertTools.END_CERTIFICATE) || temp.equals(endKeyTrust))
+          !(temp.equals(CertTools1.END_CERTIFICATE) || temp.equals(endKeyTrust))
         ) {
           opstr.print(temp);
         }
@@ -1090,7 +1090,7 @@ public class CertTools1 {
             "Error in " +
             certstream.toString() +
             ", missing " +
-            CertTools.END_CERTIFICATE +
+            CertTools1.END_CERTIFICATE +
             " boundary"
           );
         }
@@ -1166,11 +1166,11 @@ public class CertTools1 {
     while (iter.hasNext()) {
       Certificate cert = (Certificate) iter.next();
       byte[] certbuf = Base64.encode(cert.getEncoded());
-      opstr.println("Subject: " + CertTools.getSubjectDN(cert));
-      opstr.println("Issuer: " + CertTools.getIssuerDN(cert));
-      opstr.println(CertTools.BEGIN_CERTIFICATE);
+      opstr.println("Subject: " + CertTools1.getSubjectDN(cert));
+      opstr.println("Issuer: " + CertTools1.getIssuerDN(cert));
+      opstr.println(CertTools1.BEGIN_CERTIFICATE);
       opstr.println(new String(certbuf));
-      opstr.println(CertTools.END_CERTIFICATE);
+      opstr.println(CertTools1.END_CERTIFICATE);
     }
     opstr.close();
     byte[] ret = ostr.toByteArray();
@@ -1217,7 +1217,7 @@ public class CertTools1 {
       prov = "BC";
     }
     try {
-      CertificateFactory cf = CertTools.getCertificateFactory(prov);
+      CertificateFactory cf = CertTools1.getCertificateFactory(prov);
       ret = cf.generateCertificate(new ByteArrayInputStream(cert));
     } catch (CertificateException e) {
       log.debug("CertificateException trying to read X509Certificate.");
@@ -1271,7 +1271,7 @@ public class CertTools1 {
    */
   public static X509CRL getCRLfromByteArray(byte[] crl) throws CRLException {
     log.trace(">getCRLfromByteArray");
-    CertificateFactory cf = CertTools.getCertificateFactory();
+    CertificateFactory cf = CertTools1.getCertificateFactory();
     X509CRL x509crl = (X509CRL) cf.generateCRL(new ByteArrayInputStream(crl));
     log.trace("<getCRLfromByteArray");
 
@@ -1289,13 +1289,13 @@ public class CertTools1 {
     if (log.isTraceEnabled()) {
       log.trace(
         ">isSelfSigned: cert: " +
-        CertTools.getIssuerDN(cert) +
+        CertTools1.getIssuerDN(cert) +
         "\n" +
-        CertTools.getSubjectDN(cert)
+        CertTools1.getSubjectDN(cert)
       );
     }
-    boolean ret = CertTools.getSubjectDN(cert).equals(
-      CertTools.getIssuerDN(cert)
+    boolean ret = CertTools1.getSubjectDN(cert).equals(
+      CertTools1.getIssuerDN(cert)
     );
     if (log.isTraceEnabled()) {
       log.trace("<isSelfSigned:" + ret);
@@ -1533,8 +1533,8 @@ public class CertTools1 {
     certgen.setNotBefore(firstDate);
     certgen.setNotAfter(lastDate);
     certgen.setSignatureAlgorithm(sigAlg);
-    certgen.setSubjectDN(CertTools.stringToBcX509Name(dn));
-    certgen.setIssuerDN(CertTools.stringToBcX509Name(dn));
+    certgen.setSubjectDN(CertTools1.stringToBcX509Name(dn));
+    certgen.setIssuerDN(CertTools1.stringToBcX509Name(dn));
     certgen.setPublicKey(publicKey);
 
     // Basic constranits is always critical and MUST be present at-least in CA-certificates.
@@ -1736,7 +1736,7 @@ public class CertTools1 {
       DERObjectIdentifier id = DERObjectIdentifier.getInstance(
         seq.getObjectAt(0)
       );
-      if (id.getId().equals(CertTools.UPN_OBJECTID)) {
+      if (id.getId().equals(CertTools1.UPN_OBJECTID)) {
         ASN1TaggedObject obj = (ASN1TaggedObject) seq.getObjectAt(1);
         DERUTF8String str = DERUTF8String.getInstance(obj.getObject());
         return str.getString();
@@ -1757,7 +1757,7 @@ public class CertTools1 {
       DERObjectIdentifier id = DERObjectIdentifier.getInstance(
         seq.getObjectAt(0)
       );
-      if (id.getId().equals(CertTools.GUID_OBJECTID)) {
+      if (id.getId().equals(CertTools1.GUID_OBJECTID)) {
         ASN1TaggedObject obj = (ASN1TaggedObject) seq.getObjectAt(1);
         ASN1OctetString str = ASN1OctetString.getInstance(obj.getObject());
         ret = new String(Hex.encode(str.getOctets()));
@@ -1796,7 +1796,7 @@ public class CertTools1 {
       DERObjectIdentifier id = DERObjectIdentifier.getInstance(
         seq.getObjectAt(0)
       );
-      if (id.getId().equals(CertTools.KRB5PRINCIPAL_OBJECTID)) {
+      if (id.getId().equals(CertTools1.KRB5PRINCIPAL_OBJECTID)) {
         // Get the KRB5PrincipalName sequence
         ASN1TaggedObject oobj = (ASN1TaggedObject) seq.getObjectAt(1);
         // After encoding in a cert, it is tagged an extra time...
@@ -1852,7 +1852,7 @@ public class CertTools1 {
         while (i.hasNext()) {
           ASN1Sequence seq = getAltnameSequence((List<?>) i.next());
           if (seq != null) {
-            String guid = CertTools.getGUIDStringFromSequence(seq);
+            String guid = CertTools1.getGUIDStringFromSequence(seq);
             if (guid != null) {
               return guid;
             }
@@ -1909,7 +1909,7 @@ public class CertTools1 {
           GeneralName gn = gns[i];
           int tag = gn.getTagNo();
           DEREncodable name = gn.getName();
-          String str = CertTools.getGeneralNameString(tag, name);
+          String str = CertTools1.getGeneralNameString(tag, name);
           if (altName == null) {
             altName = str;
           } else {
@@ -1980,38 +1980,38 @@ public class CertTools1 {
             String upn = getUPNStringFromSequence(seq);
             // OtherName can be something else besides UPN
             if (upn != null) {
-              result += append + CertTools.UPN + "=" + upn;
+              result += append + CertTools1.UPN + "=" + upn;
             } else {
               String krb5Principal = getKrb5PrincipalNameFromSequence(seq);
               if (krb5Principal != null) {
                 result +=
-                  append + CertTools.KRB5PRINCIPAL + "=" + krb5Principal;
+                  append + CertTools1.KRB5PRINCIPAL + "=" + krb5Principal;
               } else {
                 String guid = getGUIDStringFromSequence(seq);
                 if (guid != null) {
-                  result += append + CertTools.GUID + "=" + guid;
+                  result += append + CertTools1.GUID + "=" + guid;
                 }
               }
             }
             break;
           case 1:
-            result += append + CertTools.EMAIL + "=" + (String) value;
+            result += append + CertTools1.EMAIL + "=" + (String) value;
             break;
           case 2:
-            result += append + CertTools.DNS + "=" + (String) value;
+            result += append + CertTools1.DNS + "=" + (String) value;
             break;
           case 3: // SubjectAltName of type x400Address not supported
             break;
           case 4:
-            result += append + CertTools.DIRECTORYNAME + "=" + (String) value;
+            result += append + CertTools1.DIRECTORYNAME + "=" + (String) value;
             break;
           case 5: // SubjectAltName of type ediPartyName not supported
             break;
           case 6:
-            result += append + CertTools.URI + "=" + (String) value;
+            result += append + CertTools1.URI + "=" + (String) value;
             break;
           case 7:
-            result += append + CertTools.IPADDR + "=" + (String) value;
+            result += append + CertTools1.IPADDR + "=" + (String) value;
             break;
           default: // SubjectAltName of unknown type
             break;
@@ -2037,7 +2037,7 @@ public class CertTools1 {
     }
     ASN1EncodableVector vec = new ASN1EncodableVector();
 
-    ArrayList<String> emails = CertTools.getEmailFromDN(altName);
+    ArrayList<String> emails = CertTools1.getEmailFromDN(altName);
     if (!emails.isEmpty()) {
       Iterator<String> iter = emails.iterator();
       while (iter.hasNext()) {
@@ -2049,7 +2049,7 @@ public class CertTools1 {
       }
     }
 
-    ArrayList<String> dns = CertTools.getPartsFromDN(altName, CertTools.DNS);
+    ArrayList<String> dns = CertTools1.getPartsFromDN(altName, CertTools1.DNS);
     if (!dns.isEmpty()) {
       Iterator<String> iter = dns.iterator();
       while (iter.hasNext()) {
@@ -2068,7 +2068,7 @@ public class CertTools1 {
       vec.add(gn);
     }
 
-    ArrayList<String> uri = CertTools.getPartsFromDN(altName, CertTools.URI);
+    ArrayList<String> uri = CertTools1.getPartsFromDN(altName, CertTools1.URI);
     if (!uri.isEmpty()) {
       Iterator<String> iter = uri.iterator();
       while (iter.hasNext()) {
@@ -2079,7 +2079,7 @@ public class CertTools1 {
         vec.add(gn);
       }
     }
-    uri = CertTools.getPartsFromDN(altName, CertTools.URI1);
+    uri = CertTools1.getPartsFromDN(altName, CertTools1.URI1);
     if (!uri.isEmpty()) {
       Iterator<String> iter = uri.iterator();
       while (iter.hasNext()) {
@@ -2090,7 +2090,7 @@ public class CertTools1 {
         vec.add(gn);
       }
     }
-    uri = CertTools.getPartsFromDN(altName, CertTools.URI2);
+    uri = CertTools1.getPartsFromDN(altName, CertTools1.URI2);
     if (!uri.isEmpty()) {
       Iterator<String> iter = uri.iterator();
       while (iter.hasNext()) {
@@ -2102,9 +2102,9 @@ public class CertTools1 {
       }
     }
 
-    ArrayList<String> ipstr = CertTools.getPartsFromDN(
+    ArrayList<String> ipstr = CertTools1.getPartsFromDN(
       altName,
-      CertTools.IPADDR
+      CertTools1.IPADDR
     );
     if (!ipstr.isEmpty()) {
       Iterator<String> iter = ipstr.iterator();
@@ -2116,12 +2116,12 @@ public class CertTools1 {
     }
 
     // UPN is an OtherName see method getUpn... for asn.1 definition
-    ArrayList<String> upn = CertTools.getPartsFromDN(altName, CertTools.UPN);
+    ArrayList<String> upn = CertTools1.getPartsFromDN(altName, CertTools1.UPN);
     if (!upn.isEmpty()) {
       Iterator<String> iter = upn.iterator();
       while (iter.hasNext()) {
         ASN1EncodableVector v = new ASN1EncodableVector();
-        v.add(new DERObjectIdentifier(CertTools.UPN_OBJECTID));
+        v.add(new DERObjectIdentifier(CertTools1.UPN_OBJECTID));
         v.add(
           new DERTaggedObject(true, 0, new DERUTF8String((String) iter.next()))
         );
@@ -2131,14 +2131,17 @@ public class CertTools1 {
       }
     }
 
-    ArrayList<String> guid = CertTools.getPartsFromDN(altName, CertTools.GUID);
+    ArrayList<String> guid = CertTools1.getPartsFromDN(
+      altName,
+      CertTools1.GUID
+    );
     if (!guid.isEmpty()) {
       Iterator<String> iter = guid.iterator();
       while (iter.hasNext()) {
         ASN1EncodableVector v = new ASN1EncodableVector();
         byte[] guidbytes = Hex.decode((String) iter.next());
         if (guidbytes != null) {
-          v.add(new DERObjectIdentifier(CertTools.GUID_OBJECTID));
+          v.add(new DERObjectIdentifier(CertTools1.GUID_OBJECTID));
           v.add(new DERTaggedObject(true, 0, new DEROctetString(guidbytes)));
           DERObject gn = new DERTaggedObject(false, 0, new DERSequence(v));
           vec.add(gn);
@@ -2149,9 +2152,9 @@ public class CertTools1 {
     }
 
     // Krb5PrincipalName is an OtherName, see method getKrb5Principal...for ASN.1 definition
-    ArrayList<String> krb5principalname = CertTools.getPartsFromDN(
+    ArrayList<String> krb5principalname = CertTools1.getPartsFromDN(
       altName,
-      CertTools.KRB5PRINCIPAL
+      CertTools1.KRB5PRINCIPAL
     );
     if (!krb5principalname.isEmpty()) {
       Iterator<String> iter = krb5principalname.iterator();
@@ -2190,7 +2193,7 @@ public class CertTools1 {
 
         // Now we must construct the rather complex asn.1...
         ASN1EncodableVector v = new ASN1EncodableVector(); // this is the OtherName
-        v.add(new DERObjectIdentifier(CertTools.KRB5PRINCIPAL_OBJECTID));
+        v.add(new DERObjectIdentifier(CertTools1.KRB5PRINCIPAL_OBJECTID));
 
         // First the Krb5PrincipalName sequence
         ASN1EncodableVector krb5p = new ASN1EncodableVector();
@@ -2217,12 +2220,12 @@ public class CertTools1 {
     }
 
     // To support custom OIDs in altNames, they must be added as an OtherName of plain type UTF8String
-    ArrayList<String> customoids = CertTools.getCustomOids(altName);
+    ArrayList<String> customoids = CertTools1.getCustomOids(altName);
     if (!customoids.isEmpty()) {
       Iterator<String> iter = customoids.iterator();
       while (iter.hasNext()) {
         String oid = (String) iter.next();
-        ArrayList<String> oidval = CertTools.getPartsFromDN(altName, oid);
+        ArrayList<String> oidval = CertTools1.getPartsFromDN(altName, oid);
         if (!oidval.isEmpty()) {
           Iterator<String> valiter = oidval.iterator();
           while (valiter.hasNext()) {
@@ -2270,20 +2273,21 @@ public class CertTools1 {
         String upn = getUPNStringFromSequence(seq);
         // OtherName can be something else besides UPN
         if (upn != null) {
-          ret = CertTools.UPN + "=" + upn;
+          ret = CertTools1.UPN + "=" + upn;
         } else {
           String krb5Principal = getKrb5PrincipalNameFromSequence(seq);
           if (krb5Principal != null) {
-            ret = CertTools.KRB5PRINCIPAL + "=" + krb5Principal;
+            ret = CertTools1.KRB5PRINCIPAL + "=" + krb5Principal;
           }
         }
         break;
       case 1:
         ret =
-          CertTools.EMAIL + "=" + DERIA5String.getInstance(value).getString();
+          CertTools1.EMAIL + "=" + DERIA5String.getInstance(value).getString();
         break;
       case 2:
-        ret = CertTools.DNS + "=" + DERIA5String.getInstance(value).getString();
+        ret =
+          CertTools1.DNS + "=" + DERIA5String.getInstance(value).getString();
         break;
       case 3: // SubjectAltName of type x400Address not supported
         break;
@@ -2292,12 +2296,13 @@ public class CertTools1 {
       case 5: // SubjectAltName of type ediPartyName not supported
         break;
       case 6:
-        ret = CertTools.URI + "=" + DERIA5String.getInstance(value).getString();
+        ret =
+          CertTools1.URI + "=" + DERIA5String.getInstance(value).getString();
         break;
       case 7:
         ASN1OctetString oct = ASN1OctetString.getInstance(value);
         ret =
-          CertTools.IPADDR +
+          CertTools1.IPADDR +
           "=" +
           StringTools.ipOctetsToString(oct.getOctets());
         break;
@@ -2940,9 +2945,9 @@ public class CertTools1 {
    * @return
    */
   private static String getDirectoryStringFromAltName(String altName) {
-    String directoryName = CertTools.getPartFromDN(
+    String directoryName = CertTools1.getPartFromDN(
       altName,
-      CertTools.DIRECTORYNAME
+      CertTools1.DIRECTORYNAME
     );
     // DNFieldExtractor dnfe = new DNFieldExtractor(altName, DNFieldExtractor.TYPE_SUBJECTALTNAME);
     // String directoryName = dnfe.getField(DNFieldExtractor.DIRECTORYNAME, 0);
@@ -2976,7 +2981,7 @@ public class CertTools1 {
     Iterator<Certificate> iter = certlist.iterator();
     while (iter.hasNext()) {
       Certificate next = iter.next();
-      if (CertTools.isSelfSigned(next)) {
+      if (CertTools1.isSelfSigned(next)) {
         rootcert = next;
       } else {
         calist.add(next);
@@ -3017,7 +3022,7 @@ public class CertTools1 {
           CertPathValidator.getDefaultType(),
           "BC"
         );
-        CertificateFactory fact = CertTools.getCertificateFactory();
+        CertificateFactory fact = CertTools1.getCertificateFactory();
         CertPath certpath = fact.generateCertPath(calist);
 
         CertPathValidatorResult result = certPathValidator.validate(
@@ -3062,18 +3067,20 @@ public class CertTools1 {
         // This was not a certificate, is it byte encoded?
         byte[] certBytes = (byte[]) o;
         try {
-          cert = CertTools.getCertfromByteArray(certBytes);
+          cert = CertTools1.getCertfromByteArray(certBytes);
         } catch (CertificateException e1) {
           throw new CertPathValidatorException(e1);
         }
       }
-      if (CertTools.isSelfSigned(cert)) {
+      if (CertTools1.isSelfSigned(cert)) {
         rootca = cert;
       } else {
         log.debug(
-          "Adding to cacertmap with index '" + CertTools.getIssuerDN(cert) + "'"
+          "Adding to cacertmap with index '" +
+          CertTools1.getIssuerDN(cert) +
+          "'"
         );
-        cacertmap.put(CertTools.getIssuerDN(cert), cert);
+        cacertmap.put(CertTools1.getIssuerDN(cert), cert);
       }
     }
 
@@ -3087,10 +3094,12 @@ public class CertTools1 {
     int i = 0;
     while (certlist.size() != returnval.size() && i <= certlist.size()) {
       log.debug(
-        "Looking in cacertmap for '" + CertTools.getSubjectDN(currentcert) + "'"
+        "Looking in cacertmap for '" +
+        CertTools1.getSubjectDN(currentcert) +
+        "'"
       );
       Certificate nextcert = (Certificate) cacertmap.get(
-        CertTools.getSubjectDN(currentcert)
+        CertTools1.getSubjectDN(currentcert)
       );
       if (nextcert == null) {
         throw new CertPathValidatorException("Error building certificate path");
