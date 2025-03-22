@@ -50,7 +50,9 @@ import java.util.Date;
 import java.util.Enumeration;
 import javax.net.ssl.KeyManagerFactory;
 import javax.security.auth.x500.X500Principal;
-import org.apache.directory.api.util.Strings;
+// Should be able to use apache commons here
+// import org.apache.directory.api.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -209,11 +211,11 @@ public final class CertificateUtil {
     String keyStoreFile,
     String keyStorePasswordStr
   ) throws Exception {
-    char[] keyStorePassword = Strings.isEmpty(keyStorePasswordStr)
+    char[] keyStorePassword = StringUtils.isEmpty(keyStorePasswordStr)
       ? null
       : keyStorePasswordStr.toCharArray();
 
-    if (!Strings.isEmpty(keyStoreFile)) {
+    if (!StringUtils.isEmpty(keyStoreFile)) {
       // We have a provided KeyStore file: read it
       KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 

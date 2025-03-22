@@ -1,6 +1,6 @@
 package example;
 
-// https://www-sop.inria.fr/oasis/proactive2/doc/release-doc/ProActive_src_html/org/objectweb/proactive/ext/security/CertTools.java.html
+// https://www-sop.inria.fr/oasis/proactive2/doc/release-doc/ProActive_src_html/org/objectweb/proactive/ext/security/CertTools2.java.html
 /*
  * ################################################################
  *
@@ -65,33 +65,38 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-import org.apache.log4j.Logger;
+// import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.ASN1Primitive; // Was DERObject
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.asn1.x509.X509NameTokenizer;
+// import org.bouncycastle.asn1.x509.X509Extensions;
+// import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.X500NameTokenizer;
+import org.bouncycastle.asn1.x500.X500NameStyle;
 import org.bouncycastle.jce.X509KeyUsage;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-
-// import org.objectweb.proactive.core.util.log.Loggers;
-// import org.objectweb.proactive.core.util.log.ProActiveLogger;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+// import org.objectweb.proactive.core.util.// // log.Loggers;
+// import org.objectweb.proactive.core.util.// // log.ProActiveLogger;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509ExtensionUtils;
 
 /**
  * Tools to handle common certificate operations.
@@ -99,7 +104,7 @@ import org.bouncycastle.x509.X509V3CertificateGenerator;
  */
 public class CertTools2 {
 
-  static Logger log = ProActiveLogger.getLogger(Loggers.SECURITY);
+//   static Logger log = ProActiveLogger.getLogger(Loggers.SECURITY);
   public static final String EMAIL = "rfc822name";
   public static final String EMAIL1 = "email";
   public static final String EMAIL2 = "EmailAddress";
@@ -121,30 +126,30 @@ public class CertTools2 {
   private void CertTools() {}
 
   /** BC X509Name contains some lookup tables that could maybe be used here. */
-  private static final HashMap<String, DERObjectIdentifier> oids = new HashMap<
+  private static final HashMap<String, ASN1ObjectIdentifier> oids = new HashMap<
     String,
-    DERObjectIdentifier
+    ASN1ObjectIdentifier
   >();
-
+  static X500NameStyle x500NameStyle;
   static {
-    oids.put("c", X509Name.C);
-    oids.put("dc", X509Name.DC);
-    oids.put("st", X509Name.ST);
-    oids.put("l", X509Name.L);
-    oids.put("o", X509Name.O);
-    oids.put("ou", X509Name.OU);
-    oids.put("t", X509Name.T);
-    oids.put("surname", X509Name.SURNAME);
-    oids.put("initials", X509Name.INITIALS);
-    oids.put("givenname", X509Name.GIVENNAME);
-    oids.put("gn", X509Name.GIVENNAME);
-    oids.put("sn", X509Name.SN);
-    oids.put("serialnumber", X509Name.SN);
-    oids.put("cn", X509Name.CN);
-    oids.put("uid", X509Name.UID);
-    oids.put("emailaddress", X509Name.EmailAddress);
-    oids.put("e", X509Name.EmailAddress);
-    oids.put("email", X509Name.EmailAddress);
+    oids.put("c", x500NameStyle.attrNameToOID("C"));
+    oids.put("dc", x500NameStyle.attrNameToOID("DC"));
+    oids.put("st", x500NameStyle.attrNameToOID("ST"));
+    oids.put("l", x500NameStyle.attrNameToOID("L"));
+    oids.put("o", x500NameStyle.attrNameToOID("O"));
+    oids.put("ou", x500NameStyle.attrNameToOID("OU"));
+    oids.put("t", x500NameStyle.attrNameToOID("T"));
+    oids.put("surname", x500NameStyle.attrNameToOID("SURNAME"));
+    oids.put("initials", x500NameStyle.attrNameToOID("INITIALS"));
+    oids.put("givenname", x500NameStyle.attrNameToOID("GIVENNAME"));
+    oids.put("gn", x500NameStyle.attrNameToOID("GIVENNAME"));
+    oids.put("sn", x500NameStyle.attrNameToOID("SN"));
+    oids.put("serialnumber", x500NameStyle.attrNameToOID("SN"));
+    oids.put("cn", x500NameStyle.attrNameToOID("CN"));
+    oids.put("uid", x500NameStyle.attrNameToOID("UID"));
+    oids.put("emailaddress", x500NameStyle.attrNameToOID("EmailAddress"));
+    oids.put("e", x500NameStyle.attrNameToOID("EmailAddress"));
+    oids.put("email", x500NameStyle.attrNameToOID("EmailAddress"));
   }
 
   private static final String[] dNObjectsForward = {
@@ -191,8 +196,8 @@ public class CertTools2 {
   /** Change this if you want reverse order */
   private static final String[] dNObjects = dNObjectsForward;
 
-  private static DERObjectIdentifier getOid(String o) {
-    return (DERObjectIdentifier) oids.get(o.toLowerCase());
+  private static ASN1ObjectIdentifier getOid(String o) {
+    return (ASN1ObjectIdentifier) oids.get(o.toLowerCase());
   } // getOid
 
   /**
@@ -207,13 +212,13 @@ public class CertTools2 {
    *
    * @return X509Name
    */
-  public static X509Name stringToBcX509Name(String dn) {
-    //log.debug(">stringToBcX509Name: " + dn);
+  public static X500Name stringToBcX509Name(String dn) {
+    //// // log.debug(">stringToBcX509Name: " + dn);
     // first make two vectors, one with all the C, O, OU etc specifying
     // the order and one holding the actual values
     ArrayList<String> oldordering = new ArrayList<String>();
     ArrayList<String> oldvalues = new ArrayList<String>();
-    X509NameTokenizer xt = new X509NameTokenizer(dn);
+    X500NameTokenizer xt = new X500NameTokenizer(dn);
 
     while (xt.hasMoreTokens()) {
       // This is a pair (CN=xx)
@@ -231,20 +236,20 @@ public class CertTools2 {
 
     // Now in the specified order, move from oldordering to newordering,
     // reshuffling as we go along
-    Vector<DERObjectIdentifier> ordering = new Vector<DERObjectIdentifier>();
+    Vector<ASN1ObjectIdentifier> ordering = new Vector<ASN1ObjectIdentifier>();
     Vector<String> values = new Vector<String>();
     int index = -1;
 
     for (int i = 0; i < dNObjects.length; i++) {
-      //log.debug("Looking for "+objects[i]);
+      //// // log.debug("Looking for "+objects[i]);
       String object = dNObjects[i];
 
       while ((index = oldordering.indexOf(object)) != -1) {
-        //log.debug("Found 1 "+object+" at index " + index);
-        DERObjectIdentifier oid = getOid(object);
+        //// // log.debug("Found 1 "+object+" at index " + index);
+        ASN1ObjectIdentifier oid = getOid(object);
 
         if (oid != null) {
-          //log.debug("Added "+object+", "+oldvalues.elementAt(index));
+          //// // log.debug("Added "+object+", "+oldvalues.elementAt(index));
           ordering.add(oid);
 
           // remove from the old vectors, so we start clean the next round
@@ -256,21 +261,22 @@ public class CertTools2 {
     }
 
     /*
-           if (log.isDebugEnabled()) {
+           if (// // log.isDebugEnabled()) {
                Iterator i1 = ordering.iterator();
                Iterator i2 = values.iterator();
-               log.debug("Order: ");
+               // // log.debug("Order: ");
                while (i1.hasNext()) {
-                   log.debug(((DERObjectIdentifier)i1.next()).getId());
+                   // // log.debug(((ASN1ObjectIdentifier)i1.next()).getId());
                }
-               log.debug("Values: ");
+               // // log.debug("Values: ");
                while (i2.hasNext()) {
-                   log.debug((String)i2.next());
+                   // // log.debug((String)i2.next());
                }
            } */
 
-    //log.debug("<stringToBcX509Name");
-    return new X509Name(ordering, values);
+    //// // log.debug("<stringToBcX509Name");
+    return new X500Name(ordering, values);
+    
   } // stringToBcX509Name
 
   /**
@@ -282,10 +288,10 @@ public class CertTools2 {
    * @return String containing DN
    */
   public static String stringToBCDNString(String dn) {
-    //log.debug(">stringToBcDNString: "+dn);
+    //// // log.debug(">stringToBcDNString: "+dn);
     String ret = stringToBcX509Name(dn).toString();
 
-    //log.debug("<stringToBcDNString: "+ret);
+    //// // log.debug("<stringToBcDNString: "+ret);
     return ret;
   }
 
@@ -299,7 +305,7 @@ public class CertTools2 {
    * @return the found email address, or <code>null</code> if none is found
    */
   public static String getEmailFromDN(String dn) {
-    log.debug(">getEmailFromDN(" + dn + ")");
+    // log.debug(">getEmailFromDN(" + dn + ")");
 
     String email = null;
 
@@ -307,7 +313,7 @@ public class CertTools2 {
       email = getPartFromDN(dn, EMAILIDS[i]);
     }
 
-    log.debug("<getEmailFromDN(" + dn + "): " + email);
+    // log.debug("<getEmailFromDN(" + dn + "): " + email);
 
     return email;
   }
@@ -322,7 +328,7 @@ public class CertTools2 {
    * @return String containing dnpart or null if dnpart is not present
    */
   public static String getPartFromDN(String dn, String dnpart) {
-    log.debug(">getPartFromDN: dn:'" + dn + "', dnpart=" + dnpart);
+    // log.debug(">getPartFromDN: dn:'" + dn + "', dnpart=" + dnpart);
 
     String part = null;
 
@@ -330,12 +336,12 @@ public class CertTools2 {
       String o;
       dnpart += "="; // we search for 'CN=' etc.
 
-      X509NameTokenizer xt = new X509NameTokenizer(dn);
+      X500NameTokenizer xt = new X500NameTokenizer(dn);
 
       while (xt.hasMoreTokens()) {
         o = xt.nextToken();
 
-        //log.debug("checking: "+o.substring(0,dnpart.length()));
+        //// log.debug("checking: "+o.substring(0,dnpart.length()));
         if (
           (o.length() > dnpart.length()) &&
           o.substring(0, dnpart.length()).equalsIgnoreCase(dnpart)
@@ -347,7 +353,7 @@ public class CertTools2 {
       }
     }
 
-    log.debug("<getpartFromDN: resulting DN part=" + part);
+    // log.debug("<getpartFromDN: resulting DN part=" + part);
 
     return part;
   } //getPartFromDN
@@ -383,7 +389,7 @@ public class CertTools2 {
    * @return String containing the DN.
    */
   private static String getDN(X509Certificate cert, int which) {
-    //log.debug(">getDN("+which+")");
+    //// log.debug(">getDN("+which+")");
     String dn = null;
     if (cert == null) {
       return dn;
@@ -394,18 +400,18 @@ public class CertTools2 {
         new ByteArrayInputStream(cert.getEncoded())
       );
 
-      //log.debug("Created certificate of class: " + x509cert.getClass().getName());
+      //// log.debug("Created certificate of class: " + x509cert.getClass().getName());
       if (which == 1) {
         dn = x509cert.getSubjectDN().toString();
       } else {
         dn = x509cert.getIssuerDN().toString();
       }
     } catch (CertificateException ce) {
-      log.error("CertificateException: ", ce);
+      // log.error("CertificateException: ", ce);
       return null;
     }
 
-    //log.debug("<getDN("+which+"):"+dn);
+    //// log.debug("<getDN("+which+"):"+dn);
     return stringToBCDNString(dn);
   } // getDN
 
@@ -417,23 +423,23 @@ public class CertTools2 {
    * @return String containing the DN.
    */
   public static String getIssuerDN(X509CRL crl) {
-    //log.debug(">getIssuerDN(crl)");
+    //// log.debug(">getIssuerDN(crl)");
     String dn = null;
     try {
-      CertificateFactory cf = CertTools.getCertificateFactory();
+      CertificateFactory cf = CertTools2.getCertificateFactory();
       X509CRL x509crl = (X509CRL) cf.generateCRL(
         new ByteArrayInputStream(crl.getEncoded())
       );
 
-      //log.debug("Created certificate of class: " + x509crl.getClass().getName());
-      dn = x509crl.getIssuerDN().toString();
+      //// log.debug("Created certificate of class: " + x509crl.getClass().getName());
+      dn = x509crl.getIssuerX500Principal().toString();
     } catch (CRLException ce) {
-      log.error("CRLException: ", ce);
+      // log.error("CRLException: ", ce);
 
       return null;
     }
 
-    //log.debug("<getIssuerDN(crl):"+dn);
+    //// log.debug("<getIssuerDN(crl):"+dn);
     return stringToBCDNString(dn);
   } // getIssuerDN
 
@@ -441,9 +447,9 @@ public class CertTools2 {
     try {
       return CertificateFactory.getInstance("X.509", "BC");
     } catch (NoSuchProviderException nspe) {
-      log.error("NoSuchProvider: ", nspe);
+      // log.error("NoSuchProvider: ", nspe);
     } catch (CertificateException ce) {
-      log.error("CertificateException: ", ce);
+      // log.error("CertificateException: ", ce);
     }
     return null;
   }
@@ -465,12 +471,12 @@ public class CertTools2 {
    * @exception IOException if the filen cannot be read.
    * @exception CertificateException if the filen does not contain a correct certificate.
    */
-  public static Collection getCertsFromPEM(String certFile)
+  public static Collection<X509Certificate> getCertsFromPEM(String certFile)
     throws IOException, CertificateException {
-    log.debug(">getCertfromPEM: certFile=" + certFile);
+    // log.debug(">getCertfromPEM: certFile=" + certFile);
     InputStream inStrm = new FileInputStream(certFile);
-    Collection certs = getCertsFromPEM(inStrm);
-    log.debug("<getCertfromPEM: certFile=" + certFile);
+    Collection<X509Certificate> certs = getCertsFromPEM(inStrm);
+    // log.debug("<getCertfromPEM: certFile=" + certFile);
     return certs;
   }
 
@@ -483,9 +489,9 @@ public class CertTools2 {
    * @exception IOException if the stream cannot be read.
    * @exception CertificateException if the stream does not contain a correct certificate.
    */
-  public static Collection getCertsFromPEM(InputStream certstream)
+  public static Collection<X509Certificate> getCertsFromPEM(InputStream certstream)
     throws IOException, CertificateException {
-    log.debug(">getCertfromPEM:");
+    // log.debug(">getCertfromPEM:");
     ArrayList<X509Certificate> ret = new ArrayList<X509Certificate>();
     String beginKey = "-----BEGIN CERTIFICATE-----";
     String endKey = "-----END CERTIFICATE-----";
@@ -525,7 +531,7 @@ public class CertTools2 {
       byte[] certbuf = Base64.decode(ostr.toByteArray());
       ostr.close();
       // Phweeew, were done, now decode the cert from file back to X509Certificate object
-      CertificateFactory cf = CertTools.getCertificateFactory();
+      CertificateFactory cf = CertTools2.getCertificateFactory();
       X509Certificate x509cert = (X509Certificate) cf.generateCertificate(
         new ByteArrayInputStream(certbuf)
       );
@@ -533,7 +539,7 @@ public class CertTools2 {
       ret.add(x509cert);
     }
 
-    log.debug("<getcertfromPEM:" + ret.size());
+    // log.debug("<getcertfromPEM:" + ret.size());
     return ret;
   } // getCertsFromPEM
 
@@ -578,13 +584,13 @@ public class CertTools2 {
    */
   public static X509Certificate getCertfromByteArray(byte[] cert)
     throws IOException, CertificateException {
-    log.debug(">getCertfromByteArray:");
+    // log.debug(">getCertfromByteArray:");
 
-    CertificateFactory cf = CertTools.getCertificateFactory();
+    CertificateFactory cf = CertTools2.getCertificateFactory();
     X509Certificate x509cert = (X509Certificate) cf.generateCertificate(
       new ByteArrayInputStream(cert)
     );
-    log.debug("<getCertfromByteArray:");
+    // log.debug("<getCertfromByteArray:");
 
     return x509cert;
   } // getCertfromByteArray
@@ -602,15 +608,15 @@ public class CertTools2 {
    */
   public static X509CRL getCRLfromByteArray(byte[] crl)
     throws IOException, CertificateException, CRLException {
-    log.debug(">getCRLfromByteArray:");
+    // log.debug(">getCRLfromByteArray:");
 
     if (crl == null) {
       throw new IOException("Cannot read byte[] that is 'null'!");
     }
 
-    CertificateFactory cf = CertTools.getCertificateFactory();
+    CertificateFactory cf = CertTools2.getCertificateFactory();
     X509CRL x509crl = (X509CRL) cf.generateCRL(new ByteArrayInputStream(crl));
-    log.debug("<getCRLfromByteArray:");
+    // log.debug("<getCRLfromByteArray:");
 
     return x509crl;
   } // getCRLfromByteArray
@@ -623,17 +629,17 @@ public class CertTools2 {
    * @return boolean true if the certificate has the same issuer and subject, false otherwise.
    */
   public static boolean isSelfSigned(X509Certificate cert) {
-    log.debug(
-      ">isSelfSigned: cert: " +
-      CertTools.getIssuerDN(cert) +
-      "\n" +
-      CertTools.getSubjectDN(cert)
-    );
+    // log.debug(
+  //    ">isSelfSigned: cert: " +
+  //    CertTools2.getIssuerDN(cert) +
+  //    "\n" +
+  //    CertTools2.getSubjectDN(cert)
+  //  );
 
-    boolean ret = CertTools.getSubjectDN(cert).equals(
-      CertTools.getIssuerDN(cert)
+    boolean ret = CertTools2.getSubjectDN(cert).equals(
+      CertTools2.getIssuerDN(cert)
     );
-    log.debug("<isSelfSigned:" + ret);
+    // log.debug("<isSelfSigned:" + ret);
 
     return ret;
   } // isSelfSigned
@@ -673,60 +679,93 @@ public class CertTools2 {
 
     // validity in days = validity*24*60*60*1000 milliseconds
     lastDate.setTime(lastDate.getTime() + (validity * (24 * 60 * 60 * 1000)));
-
-    X509V3CertificateGenerator certgen = new X509V3CertificateGenerator();
+    /*
+     * X509v3CertificateBuilder(
+     * org.bouncycastle.asn1.x500.X500Name issuer, 
+     * BigInteger serial, 
+     * Date notBefore, 
+     * Date notAfter, 
+     * org.bouncycastle.asn1.x500.X500Name subject, 
+     * org.bouncycastle.asn1.x509.SubjectPublicKeyInfo publicKeyInfo)
+     * */
+    // SubjectPublicKeyInfo publicKeyInfo = new SubjectPublicKeyInfo();
+    
+    // X509v3CertificateBuilder certgen = new X509v3CertificateBuilder();
 
     // Serialnumber is random bits, where random generator is initialized with Date.getTime() when this
     // bean is created.
+    //Extension.basicConstraints
+    
+    // There is a HUGE list of ASN1Encodable types (see ASN1Encodable javadoc)
+    // if (isCA == true) {
+    	// 0x4 + 0x2
+      int keyusage = X509KeyUsage.keyCertSign + X509KeyUsage.cRLSign;
+      X509KeyUsage ku = new X509KeyUsage(keyusage);
+      //certgen.addExtension(Extension.keyUsage, true, ku);
+    // }
+
+    BasicConstraints bc = new BasicConstraints(isCA);
     byte[] serno = new byte[8];
     SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
     random.setSeed((long) (new Date().getTime()));
     random.nextBytes(serno);
-    certgen.setSerialNumber((new java.math.BigInteger(serno)).abs());
-    certgen.setNotBefore(firstDate);
-    certgen.setNotAfter(lastDate);
-    certgen.setSignatureAlgorithm(sigAlg);
-    certgen.setSubjectDN(CertTools.stringToBcX509Name(dn));
-    certgen.setIssuerDN(CertTools.stringToBcX509Name(dn));
-    certgen.setPublicKey(pubKey);
+    X509v3CertificateBuilder x509v3CertificateBuilder = X509v3CertificateBuilder(
+    		CertTools2.stringToBcX509Name(dn),
+    		(new java.math.BigInteger(serno)).abs(),
+    		firstDate,
+    		lastDate,
+    		CertTools2.stringToBcX509Name(dn),
+    		pubKey);
+    x509v3CertificateBuilder.addExtension(Extension.basicConstraints,true,bc);
+    x509v3CertificateBuilder.addExtension(Extension.keyUsage, true, ku); // for CA
+    
+    // certgen.setSerialNumber((new java.math.BigInteger(serno)).abs());
+    // certgen.setNotBefore(firstDate);
+    // certgen.setNotAfter(lastDate);
+    // certgen.setSignatureAlgorithm(sigAlg);
+    // certgen.setSubjectDN(CertTools2.stringToBcX509Name(dn));
+    // certgen.setIssuerDN(CertTools2.stringToBcX509Name(dn));
+    // certgen.setPublicKey(pubKey);
 
     // Basic constranits is always critical and MUST be present at-least in CA-certificates.
-    BasicConstraints bc = new BasicConstraints(isCA);
-    certgen.addExtension(X509Extensions.BasicConstraints.getId(), true, bc);
 
-    // Put critical KeyUsage in CA-certificates
-    if (isCA == true) {
-      int keyusage = X509KeyUsage.keyCertSign + X509KeyUsage.cRLSign;
-      X509KeyUsage ku = new X509KeyUsage(keyusage);
-      certgen.addExtension(X509Extensions.KeyUsage.getId(), true, ku);
-    }
+    
+
 
     // Subject and Authority key identifier is always non-critical and MUST be present for certificates to verify in Mozilla.
     try {
       if (isCA == true) {
-        SubjectPublicKeyInfo spki = new SubjectPublicKeyInfo(
-          (ASN1Sequence) new ASN1InputStream(
-            new ByteArrayInputStream(pubKey.getEncoded())
-          ).readObject()
-        );
-        SubjectKeyIdentifier ski = new SubjectKeyIdentifier(spki);
+        SubjectPublicKeyInfo spki = SubjectPublicKeyInfo
+        		.getInstance(
+        				(ASN1Sequence) new ASN1InputStream(
+                new ByteArrayInputStream(pubKey.getEncoded())).readObject());
+        
+//        new SubjectPublicKeyInfo(
+//          (ASN1Sequence) new ASN1InputStream(
+//            new ByteArrayInputStream(pubKey.getEncoded())
+//          ).readObject()
+//        );
+        // SubjectKeyIdentifier ski = new SubjectKeyIdentifier(spki);
 
-        SubjectPublicKeyInfo apki = new SubjectPublicKeyInfo(
-          (ASN1Sequence) new ASN1InputStream(
-            new ByteArrayInputStream(pubKey.getEncoded())
-          ).readObject()
-        );
-        AuthorityKeyIdentifier aki = new AuthorityKeyIdentifier(apki);
+        // The use the same public key so just setting them equal.
+        X509ExtensionUtils x509ExtensionUtils;
+        AuthorityKeyIdentifier apki = x509ExtensionUtils.createAuthorityKeyIdentifier(spki);
+        // SubjectPublicKeyInfo apki = spki;
+//        SubjectPublicKeyInfo apki = new SubjectPublicKeyInfo(
+//          (ASN1Sequence) new ASN1InputStream(
+//            new ByteArrayInputStream(pubKey.getEncoded())
+//          ).readObject()
+//        );
+        //use x509certutils for this
+        // AuthorityKeyIdentifier aki = new AuthorityKeyIdentifier(apki);
 
-        certgen.addExtension(
-          X509Extensions.SubjectKeyIdentifier.getId(),
+        x509v3CertificateBuilder.addExtension(
+          Extension.subjectKeyIdentifier, false, spki);
+        
+        x509v3CertificateBuilder.addExtension(
+          Extension.authorityKeyIdentifier,
           false,
-          ski
-        );
-        certgen.addExtension(
-          X509Extensions.AuthorityKeyIdentifier.getId(),
-          false,
-          aki
+          apki
         );
       }
     } catch (IOException e) { // do nothing
@@ -735,17 +774,18 @@ public class CertTools2 {
     // CertificatePolicies extension if supplied policy ID, always non-critical
     if (policyId != null) {
       PolicyInformation pi = new PolicyInformation(
-        new DERObjectIdentifier(policyId)
+        new ASN1ObjectIdentifier(policyId)
       );
       DERSequence seq = new DERSequence(pi);
-      certgen.addExtension(
-        X509Extensions.CertificatePolicies.getId(),
+      x509v3CertificateBuilder.addExtension(
+        Extension.certificatePolicies,
         false,
         seq
       );
     }
 
-    X509Certificate selfcert = certgen.generateX509Certificate(privKey);
+    // Neds to be type ContentSigner
+    X509Certificate selfcert = x509v3CertificateBuilder.build(privKey);
 
     return selfcert;
   } //genselfCert
@@ -773,7 +813,7 @@ public class CertTools2 {
     // validity in days = validity*24*60*60*1000 milliseconds
     lastDate.setTime(lastDate.getTime() + (validity * (24 * 60 * 60 * 1000)));
 
-    X509V3CertificateGenerator certgen = new X509V3CertificateGenerator();
+    X509v3CertificateBuilder certgen = new X509v3CertificateBuilder();
 
     // Serialnumber is random bits, where random generator is initialized with Date.getTime() when this
     // bean is created.
@@ -785,8 +825,8 @@ public class CertTools2 {
     certgen.setNotBefore(firstDate);
     certgen.setNotAfter(lastDate);
     certgen.setSignatureAlgorithm(sigAlg);
-    certgen.setSubjectDN(CertTools.stringToBcX509Name(dn));
-    certgen.setIssuerDN(CertTools.stringToBcX509Name(caDn));
+    certgen.setSubjectDN(CertTools2.stringToBcX509Name(dn));
+    certgen.setIssuerDN(CertTools2.stringToBcX509Name(caDn));
     certgen.setPublicKey(pubKey);
 
     // Basic constranits is always critical and MUST be present at-least in CA-certificates.
@@ -836,7 +876,7 @@ public class CertTools2 {
     // CertificatePolicies extension if supplied policy ID, always non-critical
     if (policyId != null) {
       PolicyInformation pi = new PolicyInformation(
-        new DERObjectIdentifier(policyId)
+        new ASN1ObjectIdentifier(policyId)
       );
       DERSequence seq = new DERSequence(pi);
       certgen.addExtension(
@@ -949,7 +989,7 @@ public class CertTools2 {
         Integer no = (Integer) listitem.get(0);
         if (no.intValue() == 0) {
           byte[] altName = (byte[]) listitem.get(1);
-          DERObject oct = (DERObject) (new ASN1InputStream(
+          ASN1Primitive oct = (ASN1Primitive) (new ASN1InputStream(
               new ByteArrayInputStream(altName)
             ).readObject());
           ASN1Sequence seq = ASN1Sequence.getInstance(oct);
@@ -968,7 +1008,7 @@ public class CertTools2 {
   public static URL getCrlDistributionPoint(X509Certificate certificate)
     throws CertificateParsingException {
     try {
-      DERObject obj = getExtensionValue(
+      ASN1Primitive obj = getExtensionValue(
         certificate,
         X509Extensions.CRLDistributionPoints.getId()
       );
@@ -1000,9 +1040,9 @@ public class CertTools2 {
   }
 
   /**
-   * Return an Extension DERObject from a certificate
+   * Return an Extension ASN1Primitive from a certificate
    */
-  private static DERObject getExtensionValue(X509Certificate cert, String oid)
+  private static ASN1Primitive getExtensionValue(X509Certificate cert, String oid)
     throws IOException {
     byte[] bytes = cert.getExtensionValue(oid);
     if (bytes == null) {
@@ -1014,7 +1054,7 @@ public class CertTools2 {
     return aIn.readObject();
   } //getExtensionValue
 
-  private static String getStringFromGeneralNames(DERObject names) {
+  private static String getStringFromGeneralNames(ASN1Primitive names) {
     ASN1Sequence namesSequence = ASN1Sequence.getInstance(
       (ASN1TaggedObject) names,
       false
@@ -1044,11 +1084,11 @@ public class CertTools2 {
 
       return Hex.encode(res).toString();
     } catch (CertificateEncodingException cee) {
-      log.error("Error encoding X509 certificate.", cee);
+      // log.error("Error encoding X509 certificate.", cee);
     } catch (CertificateException cee) {
-      log.error("Error decoding X509 certificate.", cee);
+      // log.error("Error decoding X509 certificate.", cee);
     } catch (IOException ioe) {
-      log.error("Error reading byte array for X509 certificate.", ioe);
+      // log.error("Error reading byte array for X509 certificate.", ioe);
     }
 
     return null;
@@ -1067,7 +1107,7 @@ public class CertTools2 {
 
       return Hex.encode(res).toString();
     } catch (CertificateEncodingException cee) {
-      log.error("Error encoding X509 certificate.", cee);
+      // log.error("Error encoding X509 certificate.", cee);
     }
 
     return null;
@@ -1086,7 +1126,7 @@ public class CertTools2 {
 
       return Hex.encode(res).toString();
     } catch (CRLException ce) {
-      log.error("Error encoding X509 CRL.", ce);
+      // log.error("Error encoding X509 CRL.", ce);
     }
 
     return null;
@@ -1105,7 +1145,7 @@ public class CertTools2 {
 
       return md.digest(ba);
     } catch (NoSuchAlgorithmException nsae) {
-      log.error("SHA1 algorithm not supported", nsae);
+      // log.error("SHA1 algorithm not supported", nsae);
     }
 
     return null;
@@ -1124,7 +1164,7 @@ public class CertTools2 {
 
       return md.digest(ba);
     } catch (NoSuchAlgorithmException nsae) {
-      log.error("MD5 algorithm not supported", nsae);
+      // log.error("MD5 algorithm not supported", nsae);
     }
 
     return null;
